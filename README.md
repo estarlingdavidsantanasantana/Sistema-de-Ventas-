@@ -64,7 +64,7 @@ git https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/tree/mast
 <img src="https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/blob/master/Captura%20de%20pantalla%202026-02-24%20151749.png?raw=true" width="600">
 
 <h3> Formulario de Producto</h3>
-<img src="LINK_IMAGEN_3" width="600">
+<img src="https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/blob/master/Captura%20de%20pantalla%202026-02-24%20151816.png?raw=true" width="600">
 
 <h3> Formulario de Venta</h3>
 <img src="LINK_IMAGEN_4" width="600">
