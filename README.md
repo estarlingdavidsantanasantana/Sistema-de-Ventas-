@@ -44,11 +44,11 @@ así como la generación de reportes correspondientes a cada uno de estos módul
 <h2> Clonar Repositorio</h2>
 
 <pre>
-git clone https://github.com/TU-USUARIO/TU-REPOSITORIO.git
+git https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/tree/master
 </pre>
 
 <p>
-<a href="https://github.com/TU-USUARIO/TU-REPOSITORIO">
+<a href="https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/tree/master">
 🔗 Ver Repositorio
 </a>
 </p>
