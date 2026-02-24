@@ -1,24 +1,24 @@
 <h1 align="center">📌 DATOS DEL PROYECTO</h1>
 
-<p><strong>Nombre:</strong> Estalina Bizantina Centana</p>
+<p><strong>Nombre:</strong> Starling David Santana S.</p>
 <p><strong>Área:</strong> Informática</p>
-<p><strong>Curso:</strong> Quinto 2</p>
-<p><strong>Número de Lista:</strong> 17</p>
+<p><strong>Curso:</strong> 5TO D2</p>
+<p><strong>Número de Lista:</strong> #17</p>
 
 <hr>
 
-<h2>📖 Sobre el Trabajo</h2>
+<h2> Sobre el Trabajo</h2>
 
 <p>
 Este trabajo es el proyecto final de la RA número 2, en el cual desarrollamos 
 un sistema de ventas compuesto por varios formularios. 
 Entre ellos se encuentran los formularios de categoría, producto, venta y facturación, 
-así como la generación de reportes correspondientes a cada uno de estos módulos.
+así como la generación de reportes correspondientes a alas ventas realizadas.
 </p>
 
 <hr>
 
-<h2>🛠️ Tecnologías Utilizadas</h2>
+<h2> Tecnologías Utilizadas</h2>
 
 <p align="center">
 
