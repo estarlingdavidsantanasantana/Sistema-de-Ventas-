@@ -70,7 +70,7 @@ git https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/tree/mast
 <img src="https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/blob/master/Captura%20de%20pantalla%202026-02-24%20151845.png?raw=true" width="600">
 
 <h3> Formulario de Facturación</h3>
-<img src="LINK_IMAGEN_5" width="600">
+<img src="https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/blob/master/Captura%20de%20pantalla%202026-02-24%20151859.png?raw=true" width="600">
 
 <hr>
 
