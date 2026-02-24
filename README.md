@@ -33,11 +33,6 @@ así como la generación de reportes correspondientes a alas ventas realizadas.
 </a>
 
 <a href="#">
-  <img src="https://img.icons8.com/color/96/source-code.png" 
-       alt="CCA" width="80">
-</a>
-
-<a href="#">
   <img src="https://upload.wikimedia.org/wikipedia/commons/d/d2/C_Sharp_Logo_2023.svg" 
        alt="CCA" width="80">
 </a>
