@@ -1,0 +1,205 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using CapaEntidades;
+using CapaNegocio;
+
+namespace CapaPresentacion
+{
+
+
+    public partial class Formularioventa : Form
+    {
+        VentaBL bL = new VentaBL();
+        ProductoBL productoBL = new ProductoBL();
+        DetalleVentaBL detalleBL = new DetalleVentaBL();
+
+        // DataTable para detalle en memoria
+        private DataTable dtDetalle;
+
+        public Formularioventa()
+        {
+            InitializeComponent();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            textBox1.Clear();
+            textBox2.Clear();
+            textBox3.Clear();
+            textBox4.Clear();
+
+            textBox1.Focus();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            dataGridView1.DataSource = bL.ListarVentas();
+            UIHelpers.HideIdColumns(dataGridView1);
+            CargarVentas();
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            // Esta acción ahora será para agregar un producto al detalle
+            AgregarDetalle();
+        }
+
+        private void Formularioventa_Load(object sender, EventArgs e)
+        {
+            CargarVentas();
+            CargarProductos();
+            InicializarDetalleTable();
+            this.BackColor = Color.LightBlue;
+        }
+
+        private void CargarVentas()
+        {
+
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void CargarProductos()
+        {
+            try
+            {
+                DataTable dt = productoBL.ListarProductos();
+                // Usar DataTable para llenar ComboBox
+                comboBoxProducto.DisplayMember = "Nombre_producto";
+                comboBoxProducto.ValueMember = "ID_producto";
+                comboBoxProducto.DataSource = dt;
+                comboBoxProducto.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar productos: " + ex.Message);
+            }
+        }
+
+        private void InicializarDetalleTable()
+        {
+            dtDetalle = new DataTable();
+            dtDetalle.Columns.Add("Id_producto", typeof(int));
+            dtDetalle.Columns.Add("Nombre_producto", typeof(string));
+            dtDetalle.Columns.Add("Cant", typeof(int));
+            dtDetalle.Columns.Add("Precio", typeof(decimal));
+            dtDetalle.Columns.Add("Subtotal", typeof(decimal), "Cant * Precio");
+
+            dataGridViewDetalle.DataSource = dtDetalle;
+            UIHelpers.HideIdColumns(dataGridViewDetalle);
+        }
+
+        private void AgregarDetalle()
+        {
+            if (comboBoxProducto.SelectedIndex == -1)
+            {
+                MessageBox.Show("Seleccione un producto");
+                return;
+            }
+
+            int idProducto = Convert.ToInt32(comboBoxProducto.SelectedValue);
+            string nombre = comboBoxProducto.Text;
+            int cant = (int)numericUpDownCant.Value;
+
+            // Obtener precio del producto desde la lista (DataTable)
+            DataTable dtProd = (DataTable)comboBoxProducto.DataSource;
+            DataRow[] rows = dtProd.Select("ID_producto = " + idProducto);
+            decimal precio = 0;
+            if (rows.Length > 0)
+            {
+                precio = Convert.ToDecimal(rows[0]["Precio_producto"]);
+            }
+
+            // Agregar a dtDetalle
+            dtDetalle.Rows.Add(idProducto, nombre, cant, precio);
+
+            CalcularTotal();
+        }
+
+        private void CalcularTotal()
+        {
+            decimal total = 0;
+            foreach (DataRow r in dtDetalle.Rows)
+            {
+                total += Convert.ToDecimal(r["Subtotal"]);
+            }
+
+            textBox3.Text = total.ToString(); // Mostrar total en el textbox correspondiente
+            label2.Text = "Total: " + total.ToString("N2");
+        }
+
+        private void buttonAgregar_Click(object sender, EventArgs e)
+        {
+            AgregarDetalle();
+        }
+
+        private void buttonGuardarVentaCompleta_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Validaciones básicas
+                if (string.IsNullOrWhiteSpace(textBox1.Text))
+                {
+                    MessageBox.Show("Ingrese la fecha de la venta");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(textBox2.Text))
+                {
+                    MessageBox.Show("Ingrese el id del cliente");
+                    return;
+                }
+
+                if (dtDetalle == null || dtDetalle.Rows.Count == 0)
+                {
+                    MessageBox.Show("Agregue al menos un producto al detalle");
+                    return;
+                }
+
+                Venta v = new Venta();
+                v.Fecha_venta = Convert.ToDateTime(textBox1.Text);
+                v.Id_cliente = Convert.ToInt32(textBox2.Text);
+                v.Total_general = Convert.ToDecimal(textBox3.Text);
+                v.Estado_venta = textBox4.Text;
+
+                int idVenta = bL.GuardarVenta(v);
+
+                // Guardar detalles
+                foreach (DataRow r in dtDetalle.Rows)
+                {
+                    DetalleVenta dv = new DetalleVenta();
+                    dv.Id_venta = idVenta;
+                    dv.Id_producto = Convert.ToInt32(r["Id_producto"]);
+                    dv.Cant = Convert.ToInt32(r["Cant"]);
+                    dv.Precio = Convert.ToDecimal(r["Precio"]);
+
+                    detalleBL.InsertarDetalle(dv);
+                }
+
+                MessageBox.Show("Venta y detalles guardados correctamente.");
+
+                // Limpiar
+                dtDetalle.Clear();
+                CalcularTotal();
+                CargarVentas();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar venta completa: " + ex.Message);
+            }
+        }
+    }
+}
+

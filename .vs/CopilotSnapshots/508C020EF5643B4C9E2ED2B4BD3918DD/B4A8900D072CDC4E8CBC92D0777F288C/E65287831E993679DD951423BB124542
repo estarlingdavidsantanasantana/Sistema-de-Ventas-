@@ -1,0 +1,84 @@
+﻿using CapaNegocio;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+
+namespace CapaPresentacion
+{
+    public partial class FormularioFacturacion : Form
+    {
+        FacturacionBL bl = new FacturacionBL();
+        public FormularioFacturacion()
+        {
+            InitializeComponent();
+        }
+
+        private void FormularioFacturacion_Load(object sender, EventArgs e)
+        {
+            dataGridView2.DataSource = null;
+            label2.Text = "0.00";
+            this.BackColor = Color.LightBlue;
+        }
+
+        // Procedimiento para listar y cargar los datos de la venta en el formulario
+        private void Listar()
+        {
+            if (string.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                MessageBox.Show("Ingrese un Id de venta válido");
+                return;
+            }
+
+            if (!int.TryParse(textBox1.Text, out int idVenta))
+            {
+                MessageBox.Show("El Id de venta debe ser un número entero");
+                return;
+            }
+
+            // Obtener la información de la venta y su detalle
+            DataTable dtVenta = bl.ObtenerVentaConCliente(idVenta);
+            DataTable dtDetalle = bl.ObtenerDetalleVenta(idVenta);
+
+            // Cargar el detalle en el grid
+            dataGridView2.DataSource = dtDetalle;
+
+            // Mostrar total
+            if (dtVenta != null && dtVenta.Rows.Count > 0)
+            {
+                // Si existe la columna Total_general, mostrarla
+                if (dtVenta.Columns.Contains("Total_general"))
+                {
+                    label2.Text = dtVenta.Rows[0]["Total_general"].ToString();
+                }
+                else
+                {
+                    // Si la columna no existe, mostrar la primera columna como fallback
+                    label2.Text = dtVenta.Rows[0][0].ToString();
+                }
+            }
+            else
+            {
+                label2.Text = "0.00";
+                MessageBox.Show("No se encontró la venta.");
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            // Llamar al procedimiento Listar que centraliza la lógica
+            Listar();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+    }
+}

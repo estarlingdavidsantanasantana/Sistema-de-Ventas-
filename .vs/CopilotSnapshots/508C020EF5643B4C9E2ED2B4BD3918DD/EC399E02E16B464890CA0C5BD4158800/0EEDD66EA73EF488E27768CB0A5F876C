@@ -1,0 +1,100 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using System.Data;
+using System.Data.SqlClient;
+using CapaEntidades;
+
+namespace CapaDatos
+{
+    public class FacturacionDAL
+    {
+        public DataTable ObtenerVentaConCliente(int idVenta)
+        {
+            DataTable tabla = new DataTable();
+
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                string sql = @"SELECT v.Id_venta, v.Fecha_venta, c.Nombre_cliente, c.Telefono, c.Direccion, 
+                                      v.Total_general, v.Estado_venta
+                               FROM Venta v
+                               INNER JOIN Cliente c ON v.Id_cliente = c.ID_cliente
+                               WHERE v.Id_venta = @Venta";
+
+                SqlCommand cmd = new SqlCommand(sql, cn);
+                cmd.Parameters.AddWithValue("@Venta", idVenta);
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(tabla);
+            }
+
+            return tabla;
+        }
+
+       
+        public DataTable ObtenerDetalleVenta(int idVenta)
+        {
+            DataTable tabla = new DataTable();
+
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                string sql = @"SELECT dv.Id_detalle, p.Nombre_producto, dv.Cant, dv.Precio, (dv.Cant*dv.Precio) AS Subtotal
+                               FROM Detalle_venta dv
+                               INNER JOIN producto p ON dv.Id_producto = p.ID_producto
+                               WHERE dv.Id_venta = @Venta";
+
+                SqlCommand cmd = new SqlCommand(sql, cn);
+                cmd.Parameters.AddWithValue("@Venta", idVenta);
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(tabla);
+            }
+
+            return tabla;
+        }
+
+        /// <summary>
+        /// Obtiene toda la información de facturación (venta + detalle) usando el SP
+        /// Retorna un array con: [0]=venta, [1]=detalle
+        /// </summary>
+        public DataTable[] ObtenerFacturacion(int idVenta)
+        {
+            DataTable[] resultado = new DataTable[2];
+            resultado[0] = new DataTable(); // Información de la venta
+            resultado[1] = new DataTable(); // Detalle de la venta
+
+            try
+            {
+                using (SqlConnection cn = Conexion.ObtenerConexion())
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_ObtenerFacturacion", cn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@IdVenta", idVenta);
+
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            DataSet ds = new DataSet();
+                            da.Fill(ds);
+
+                            if (ds.Tables.Count > 0)
+                                resultado[0] = ds.Tables[0];
+
+                            if (ds.Tables.Count > 1)
+                                resultado[1] = ds.Tables[1];
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al obtener la facturación: " + ex.Message);
+            }
+
+            return resultado;
+        }
+    }
+}

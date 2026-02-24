@@ -1,0 +1,118 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Microsoft.Reporting.WinForms;
+using CapaNegocio;
+
+namespace CapaPresentacion.Reportes
+{
+    public partial class Frmreporte : Form
+    {
+        FacturacionBL bl = new FacturacionBL();
+        VentaBL ventaBL = new VentaBL();
+
+        public Frmreporte()
+        {
+            InitializeComponent();
+        }
+
+        private void Frmreporte_Load(object sender, EventArgs e)
+        {
+            // Configura el ReportViewer para usar reportes locales
+            reportViewer1.ProcessingMode = ProcessingMode.Local;
+            
+            // Construir la ruta correcta al archivo de reporte
+            string reportPath = System.IO.Path.Combine(
+                Application.StartupPath,
+                "Reportes",
+                "reporteventa.rdlc"
+            );
+            
+            if (System.IO.File.Exists(reportPath))
+            {
+                reportViewer1.LocalReport.ReportPath = reportPath;
+            }
+            else
+            {
+                MessageBox.Show("No se encontró el archivo de reporte en: " + reportPath);
+            }
+        }
+
+        /// <summary>
+        /// Carga el reporte con datos de una venta específica
+        /// </summary>
+        /// <param name="idVenta">ID de la venta a mostrar en el reporte</param>
+        public void CargarReporteVenta(int idVenta)
+        {
+            try
+            {
+                // Obtener los datos de la venta y su detalle
+                DataTable dtVenta = bl.ObtenerVentaConCliente(idVenta);
+                DataTable dtDetalle = bl.ObtenerDetalleVenta(idVenta);
+
+                if (dtVenta == null || dtVenta.Rows.Count == 0)
+                {
+                    MessageBox.Show("No se encontró la venta con ID: " + idVenta);
+                    return;
+                }
+
+                // Combinar ambas tablas en un DataSet para el reporte
+                DataSet dsReporte = new DataSet();
+                dsReporte.Tables.Add(dtVenta.Copy());
+                dsReporte.Tables.Add(dtDetalle.Copy());
+
+                // Configurar el reporte
+                reportViewer1.LocalReport.DataSources.Clear();
+                
+                // Crear una fuente de datos para el DataSet
+                ReportDataSource rds = new ReportDataSource("DataSet1", dsReporte.Tables[0]);
+                reportViewer1.LocalReport.DataSources.Add(rds);
+
+                // Refrescar el reporte
+                reportViewer1.RefreshReport();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar el reporte: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Carga el reporte con todos los datos de ventas
+        /// </summary>
+        public void CargarReporteTodasVentas()
+        {
+            try
+            {
+                // Obtener todos los datos de ventas desde la BD
+                DataTable dtVentas = ventaBL.ListarVentas();
+                
+                if (dtVentas == null || dtVentas.Rows.Count == 0)
+                {
+                    MessageBox.Show("No hay datos de ventas para mostrar");
+                    return;
+                }
+
+                DataSet dsReporte = new DataSet();
+                dsReporte.Tables.Add(dtVentas.Copy());
+
+                // Configurar el reporte
+                reportViewer1.LocalReport.DataSources.Clear();
+                ReportDataSource rds = new ReportDataSource("DataSet1", dsReporte.Tables[0]);
+                reportViewer1.LocalReport.DataSources.Add(rds);
+
+                reportViewer1.RefreshReport();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar el reporte: " + ex.Message);
+            }
+        }
+    }
+}

@@ -1,0 +1,93 @@
+﻿using System;
+using System.Data;
+using System.Windows.Forms;
+using CapaNegocio;
+
+namespace CapaPresentacion
+{
+    public partial class FrmFacturacion : Form
+    {
+        VentaBL ventaBL = new VentaBL();
+        FacturacionBL facturacionBL = new FacturacionBL();
+
+        public FrmFacturacion()
+        {
+            InitializeComponent();
+
+        }
+
+        private void FrmFacturacion_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                DataTable dt = ventaBL.ListarVentas();
+                dataGridView1.DataSource = dt;
+                UIHelpers.HideIdColumns(dataGridView1);
+
+                // Ocultar la columna Estado_venta si existe
+                if (dataGridView1.Columns.Contains("Estado_venta"))
+                {
+                    dataGridView1.Columns["Estado_venta"].Visible = false;
+                }
+
+                // Limpiar el grid de detalle
+                dataGridViewDetalle.DataSource = null;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar ventas: " + ex.Message);
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            FormLogin frm = new FormLogin(); 
+            frm.Show();
+            this.Hide();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.CurrentRow == null)
+            {
+                MessageBox.Show("Seleccione una venta primero");
+                return;
+            }
+
+            int idVenta = Convert.ToInt32(dataGridView1.CurrentRow.Cells[0].Value);
+
+            // Abrir formulario de reporte y pasar idVenta
+            FrmReporteFacturacion frm = new FrmReporteFacturacion();
+
+            // Llamar método público para cargar el reporte
+            frm.LoadReport(idVenta);
+
+            frm.ShowDialog();
+        }
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridView1.CurrentRow == null) return;
+
+            int idVenta = Convert.ToInt32(dataGridView1.CurrentRow.Cells[0].Value);
+
+            try
+            {
+                DataTable dtDetalle = facturacionBL.ObtenerDetalleVenta(idVenta);
+                // Asegurar columnas: Nombre_producto, Cant, Precio, Subtotal
+                dataGridViewDetalle.DataSource = dtDetalle;
+                // Ocultar Id_detalle si existe
+                if (dataGridViewDetalle.Columns.Contains("Id_detalle"))
+                {
+                    dataGridViewDetalle.Columns["Id_detalle"].Visible = false;
+                }
+                // Asegurar orden de columnas (opcional)
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar detalle: " + ex.Message);
+            }
+        }
+    }
+}
+

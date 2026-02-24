@@ -1,0 +1,79 @@
+﻿using CapaEntidades;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CapaDatos
+{
+    public class CategoriaDAL
+    {
+        public List<Categoria> Listar()
+        {
+            List<Categoria> lista = new List<Categoria>();
+
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                SqlCommand cmd = new SqlCommand("SELECT ID_categoria, Nombre_categoria, Estado FROM categoria", cn); 
+
+                cn.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    lista.Add(new Categoria
+                    {
+                        ID_categoria = Convert.ToInt32(dr["ID_categoria"]),
+                        Nombre_categoria = dr["Nombre_categoria"].ToString(),
+                        Estado = Convert.ToBoolean(dr["Estado"])
+                    });
+                }
+            }
+            return lista;
+        }
+
+        public void Insertar(Categoria c)
+        {
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                SqlCommand cmd = new SqlCommand("sp_InsertarCategoria", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Nombre_Categoria", c.Nombre_categoria);
+
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void Actualizar(Categoria c)
+        {
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                SqlCommand cmd = new SqlCommand("sp_ActualizarCategoria", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@Id_Categoria", c.ID_categoria);
+                cmd.Parameters.AddWithValue("@Nombre_Categoria", c.Nombre_categoria);
+
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void Eliminar(int id)
+        {
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                SqlCommand cmd = new SqlCommand("sp_EliminarCategoria", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Id_Categoria", id);
+
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+    }
+}}}

@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using CapaEntidades;
+
+namespace CapaDatos
+{
+    public class FacturacionDAL
+    {
+        public DataTable ObtenerVentaConCliente(int idVenta)
+        {
+            DataTable tabla = new DataTable();
+
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                string sql = @"SELECT v.Id_venta, v.Fecha_venta, c.Nombre_cliente, c.Telefono, c.Direccion, 
+                                      v.Total_general, v.Estado_venta
+                               FROM Venta v
+                               INNER JOIN Cliente c ON v.Id_cliente = c.ID_cliente
+                               WHERE v.Id_venta = @Venta";
+
+                SqlCommand cmd = new SqlCommand(sql, cn);
+                cmd.Parameters.AddWithValue("@Venta", idVenta);
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                
+            }
+
+            return tabla;
+        }
+
+       
+        public DataTable ObtenerDetalleVenta(int idVenta)
+        {
+            DataTable tabla = new DataTable();
+
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                string sql = @"SELECT dv.Id_detalle, p.Nombre_producto, dv.Cant, dv.Precio, (dv.Cant*dv.Precio) AS Subtotal
+                               FROM Detalle_venta dv
+                               INNER JOIN producto p ON dv.Id_producto = p.ID_producto
+                               WHERE dv.Id_venta = @Venta";
+
+                SqlCommand cmd = new SqlCommand(sql, cn);
+                cmd.Parameters.AddWithValue("@Venta", idVenta);
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(tabla);
+            }
+
+            return tabla;
+        }
+    }
+}

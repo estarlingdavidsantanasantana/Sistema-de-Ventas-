@@ -1,0 +1,120 @@
+﻿using System;
+using System.Data;
+using System.IO;
+using System.Windows.Forms;
+using Microsoft.Reporting.WinForms;
+using CapaNegocio;
+
+namespace CapaPresentacion
+{
+    public partial class FrmReporteFacturacion : Form
+    {
+        VentaBL ventaBL = new VentaBL();
+        FacturacionBL facturacionBL = new FacturacionBL();
+
+        public FrmReporteFacturacion()
+        {
+            InitializeComponent();
+        }
+
+        private void FrmReporteFacturacion_Load(object sender, EventArgs e)
+        {
+            // El reporte se carga cuando se llama a LoadReport(idVenta)
+        }
+
+        public void LoadReport(int idVenta)
+        {
+            try
+            {
+                // Obtener los datos de la venta por ID
+                DataTable dtVenta = ventaBL.ListarVentas();
+                DataRow[] ventaRows = dtVenta.Select("Id_venta = " + idVenta);
+
+                if (ventaRows.Length == 0)
+                {
+                    MessageBox.Show("No se encontró la venta con ID: " + idVenta);
+                    return;
+                }
+
+                // Crear tabla filtrada con solo la venta seleccionada
+                DataTable dtVentaFiltrada = dtVenta.Clone();
+                foreach (var row in ventaRows)
+                {
+                    dtVentaFiltrada.ImportRow(row);
+                }
+
+                // Obtener los detalles de la venta
+                DataTable dtDetalle = facturacionBL.ObtenerDetalleVenta(idVenta);
+
+                // Limpiar y configurar el reporte
+                reportViewer1.LocalReport.DataSources.Clear();
+
+                // Posibles rutas del RDLC: salida o carpeta del proyecto
+                string[] candidatePaths = new string[]
+                {
+                    Path.Combine(Application.StartupPath, "Reportes", "ReporteVenta.rdlc"),
+                    Path.Combine(Application.StartupPath, "..", "Reportes", "ReporteVenta.rdlc"),
+                    Path.Combine(Application.StartupPath, "..", "..", "Reportes", "ReporteVenta.rdlc"),
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reportes", "ReporteVenta.rdlc")
+                };
+
+                string reportPath = null;
+                foreach (var p in candidatePaths)
+                {
+                    string full = Path.GetFullPath(p);
+                    if (File.Exists(full))
+                    {
+                        reportPath = full;
+                        break;
+                    }
+                }
+
+                if (reportPath == null)
+                {
+                    MessageBox.Show("El archivo del reporte no se encontró. Busqué en: \n" + string.Join("\n", candidatePaths));
+                    return;
+                }
+
+                // Asegurar que exista una copia en la carpeta de salida /Reportes
+                string outDir = Path.Combine(Application.StartupPath, "Reportes");
+                try
+                {
+                    if (!Directory.Exists(outDir)) Directory.CreateDirectory(outDir);
+                    string dest = Path.Combine(outDir, "ReporteVenta.rdlc");
+                    // Si el origen y destino son diferentes, copiar
+                    if (!string.Equals(Path.GetFullPath(reportPath), Path.GetFullPath(dest), StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        File.Copy(reportPath, dest, true);
+                        reportPath = dest;
+                    }
+                }
+                catch
+                {
+                    // Ignorar errores de copia, seguiremos usando el path encontrado
+                }
+
+                reportViewer1.LocalReport.ReportPath = reportPath;
+
+                // Añadir el DataSet de la venta (DataSet1)
+                ReportDataSource rdsVenta = new ReportDataSource("DataSet1", dtVentaFiltrada);
+                reportViewer1.LocalReport.DataSources.Add(rdsVenta);
+
+                // Añadir el DataSet de detalle (DataSetDetalle) si existen filas
+                if (dtDetalle != null)
+                {
+                    ReportDataSource rdsDetalle = new ReportDataSource("DataSetDetalle", dtDetalle);
+                    reportViewer1.LocalReport.DataSources.Add(rdsDetalle);
+                }
+
+                // Refrescar el reporte
+                reportViewer1.RefreshReport();
+
+                this.Text = "Factura #" + idVenta;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar el reporte: " + ex.Message + "\n\nStack: " + ex.StackTrace);
+            }
+        }
+    }
+}

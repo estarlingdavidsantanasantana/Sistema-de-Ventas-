@@ -1,0 +1,71 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using CapaNegocio;
+
+namespace CapaPresentacion
+{
+    public partial class FrmFacturacion : Form
+    {
+        VentaBL ventaBL = new VentaBL();
+
+        public FrmFacturacion()
+        {
+            InitializeComponent();
+
+        }
+
+        private void FrmFacturacion_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                DataTable dt = ventaBL.ListarVentas();
+                dataGridView1.DataSource = dt;
+                UIHelpers.HideIdColumns(dataGridView1);
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar ventas: " + ex.Message);
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            FormLogin frm = new FormLogin(); 
+            frm.Show();
+            this.Hide();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.CurrentRow == null)
+            {
+                MessageBox.Show("Seleccione una venta primero");
+                return;
+            }
+
+            int idVenta = Convert.ToInt32(dataGridView1.CurrentRow.Cells[0].Value);
+
+            // Abrir formulario de reporte y pasar idVenta
+            FrmReporteFacturacion frm = new FrmReporteFacturacion();
+
+            // Llamar método público para cargar el reporte (implantaré en FrmReporteFacturacion)
+            frm.LoadReport(idVenta);
+
+            frm.ShowDialog();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            dataGridView1.Columns["Estado Venta"].Visible = false;
+        }
+    }
+}
+

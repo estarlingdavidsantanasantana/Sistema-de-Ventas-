@@ -1,0 +1,53 @@
+﻿using System;
+using System.Data;
+using System.Linq;
+using System.Windows.Forms;
+using Microsoft.Reporting.WinForms;
+using CapaNegocio;
+
+namespace CapaPresentacion
+{
+    public partial class FrmReporteFacturacion : Form
+    {
+        VentaBL ventaBL = new VentaBL();
+
+        public FrmReporteFacturacion()
+        {
+            InitializeComponent();
+        }
+
+        private void FrmReporteFacturacion_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        public void LoadReport(int idVenta)
+        {
+            try
+            {
+                // Obtener todas las ventas y filtrar por id
+                DataTable dt = ventaBL.ListarVentas();
+                DataRow[] rows = dt.Select("Id_venta = " + idVenta);
+                DataTable dtFiltered = dt.Clone();
+                foreach (var r in rows)
+                {
+                    dtFiltered.ImportRow(r);
+                }
+
+                reportViewer1.LocalReport.DataSources.Clear();
+                reportViewer1.LocalReport.ReportEmbeddedResource = null;
+                reportViewer1.LocalReport.ReportPath = System.IO.Path.Combine(Application.StartupPath, "Reportes", "ReporteVenta.rdlc");
+                
+
+                ReportDataSource rds = new ReportDataSource("DataSet1", dtFiltered);
+                reportViewer1.LocalReport.DataSources.Add(rds);
+
+                reportViewer1.RefreshReport();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar el reporte: " + ex.Message);
+            }
+        }
+    }
+}

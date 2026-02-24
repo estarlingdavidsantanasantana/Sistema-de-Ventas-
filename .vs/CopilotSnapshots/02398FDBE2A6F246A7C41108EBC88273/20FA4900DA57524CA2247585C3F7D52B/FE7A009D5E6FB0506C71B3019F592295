@@ -1,0 +1,98 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Microsoft.Reporting.WinForms;
+using CapaNegocio;
+
+namespace CapaPresentacion.Reportes
+{
+    public partial class Frmreporte : Form
+    {
+        FacturacionBL bl = new FacturacionBL();
+
+        public Frmreporte()
+        {
+            InitializeComponent();
+        }
+
+        private void Frmreporte_Load(object sender, EventArgs e)
+        {
+            // Configura el ReportViewer para usar reportes locales
+            reportViewer1.ProcessingMode = ProcessingMode.Local;
+            reportViewer1.LocalReport.ReportPath = Application.StartupPath + "\\Reportes\\reporteventa.rdlc";
+        }
+
+        /// <summary>
+        /// Carga el reporte con datos de una venta específica
+        /// </summary>
+        /// <param name="idVenta">ID de la venta a mostrar en el reporte</param>
+        public void CargarReporteVenta(int idVenta)
+        {
+            try
+            {
+                // Obtener los datos de la venta y su detalle
+                DataTable dtVenta = bl.ObtenerVentaConCliente(idVenta);
+                DataTable dtDetalle = bl.ObtenerDetalleVenta(idVenta);
+
+                if (dtVenta == null || dtVenta.Rows.Count == 0)
+                {
+                    MessageBox.Show("No se encontró la venta con ID: " + idVenta);
+                    return;
+                }
+
+                // Combinar ambas tablas en un DataSet para el reporte
+                DataSet dsReporte = new DataSet();
+                dsReporte.Tables.Add(dtVenta.Copy());
+                dsReporte.Tables.Add(dtDetalle.Copy());
+
+                // Configurar el reporte
+                reportViewer1.LocalReport.DataSources.Clear();
+                
+                // Crear una fuente de datos para el DataSet
+                ReportDataSource rds = new ReportDataSource("DataSet1", dsReporte.Tables[0]);
+                reportViewer1.LocalReport.DataSources.Add(rds);
+
+                // Refrescar el reporte
+                reportViewer1.RefreshReport();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar el reporte: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Carga el reporte con todos los datos de ventas
+        /// </summary>
+        public void CargarReporteTodasVentas()
+        {
+            try
+            {
+                // Obtener todos los datos de ventas desde la BD
+                DataTable dtVentas = new DataTable();
+                
+                // Aquí necesitarías un método en BL que devuelva todas las ventas
+                // Por ahora usaremos una consulta directa
+                DataSet dsReporte = new DataSet();
+                dsReporte.Tables.Add(dtVentas.Copy());
+
+                // Configurar el reporte
+                reportViewer1.LocalReport.DataSources.Clear();
+                ReportDataSource rds = new ReportDataSource("DataSet1", dsReporte.Tables[0]);
+                reportViewer1.LocalReport.DataSources.Add(rds);
+
+                reportViewer1.RefreshReport();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar el reporte: " + ex.Message);
+            }
+        }
+    }
+}

@@ -1,0 +1,94 @@
+﻿using CapaNegocio;
+using CapaPresentacion.Reportes;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+
+namespace CapaPresentacion
+{
+    public partial class FormularioFacturacion : Form
+    {
+        FacturacionBL bl = new FacturacionBL();
+        public FormularioFacturacion()
+        {
+            InitializeComponent();
+        }
+
+        private void FormularioFacturacion_Load(object sender, EventArgs e)
+        {
+            dataGridView2.DataSource = null;
+            label2.Text = "0.00";
+            this.BackColor = Color.LightBlue;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                MessageBox.Show("Ingrese un Id de venta válido");
+                return;
+            }
+
+            if (!int.TryParse(textBox1.Text, out int idVenta))
+            {
+                MessageBox.Show("El Id de venta debe ser un número entero");
+                return;
+            }
+
+            DataTable dtVenta = bl.ObtenerVentaConCliente(idVenta);
+
+            DataTable dtDetalle = bl.ObtenerDetalleVenta(idVenta);
+            dataGridView2.DataSource = dtDetalle;
+
+            // Mostrar total
+            if (dtVenta != null && dtVenta.Rows.Count > 0)
+            {
+                label2.Text = dtVenta.Rows[0]["Total_general"].ToString();
+            }
+            else
+            {
+                label2.Text = "0.00";
+                MessageBox.Show("No se encontró la venta.");
+            }
+        }
+
+        /// <summary>
+        /// Abre el formulario de reporte para la venta seleccionada
+        /// </summary>
+        private void AbrirReporte()
+        {
+            if (string.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                MessageBox.Show("Debe buscar una venta primero");
+                return;
+            }
+
+            if (!int.TryParse(textBox1.Text, out int idVenta))
+            {
+                MessageBox.Show("ID de venta inválido");
+                return;
+            }
+
+            // Crear e instancia el formulario de reporte
+            Frmreporte frmReporte = new Frmreporte();
+            
+            // Cargar el reporte con los datos de la venta
+            frmReporte.CargarReporteVenta(idVenta);
+            
+            // Mostrar el formulario
+            frmReporte.ShowDialog();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+    }
+}

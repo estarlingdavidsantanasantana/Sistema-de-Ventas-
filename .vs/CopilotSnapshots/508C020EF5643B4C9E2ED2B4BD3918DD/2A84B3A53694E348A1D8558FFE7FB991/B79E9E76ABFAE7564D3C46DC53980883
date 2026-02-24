@@ -1,0 +1,83 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using CapaEntidades;
+using CapaNegocio;
+
+namespace CapaPresentacion
+{
+
+
+    public partial class Formularioventa : Form
+    {
+        VentaBL bL = new VentaBL();
+        public Formularioventa()
+        {
+            InitializeComponent();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            textBox1.Clear();
+            textBox2.Clear();
+            textBox3.Clear();
+            textBox4.Clear();
+
+            textBox1.Focus();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            dataGridView1.DataSource = bL.ListarVentas();
+            CargarVentas();
+            
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                Venta v = new Venta();
+
+                v.Fecha_venta = Convert.ToDateTime(textBox1.Text);
+                v.Id_cliente = Convert.ToInt32(textBox2.Text);
+                v.Total_general = Convert.ToDecimal(textBox3.Text);
+                v.Estado_venta = textBox4.Text;
+
+                bL.GuardarVenta(v);
+
+                MessageBox.Show("Venta guardada correctamente.");
+
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar venta: " + ex.Message);
+            }
+        }
+
+        private void Formularioventa_Load(object sender, EventArgs e)
+        {
+            CargarVentas();
+            this.BackColor = Color.LightBlue;
+        }
+
+        private void CargarVentas()
+        {
+            
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+    }
+}
+

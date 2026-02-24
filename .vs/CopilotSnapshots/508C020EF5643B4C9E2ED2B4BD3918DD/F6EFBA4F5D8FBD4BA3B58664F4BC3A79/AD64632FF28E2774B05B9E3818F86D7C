@@ -1,0 +1,148 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using CapaEntidades;
+using CapaNegocio;
+
+namespace CapaPresentacion
+{
+    public partial class FormularioProducto : Form
+    {
+        ProductoBL bl = new ProductoBL();
+        CategoriaBL categoriaBL = new CategoriaBL();
+
+        public FormularioProducto()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Validar que todos los campos estén llenos
+                if (string.IsNullOrWhiteSpace(TextBox1.Text))
+                {
+                    MessageBox.Show("Ingrese el nombre del producto");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(TextBox2.Text))
+                {
+                    MessageBox.Show("Ingrese el precio del producto");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(TextBox3.Text))
+                {
+                    MessageBox.Show("Ingrese el stock del producto");
+                    return;
+                }
+
+                if (comboBoxCategoria.SelectedIndex == -1)
+                {
+                    MessageBox.Show("Seleccione una categoría");
+                    return;
+                }
+
+                Producto p = new Producto();
+
+                p.Nombre_producto = TextBox1.Text;
+                p.Precio_producto = Convert.ToDecimal(TextBox2.Text);
+                p.Stock = Convert.ToInt32(TextBox3.Text);
+                
+                // Obtener el ID_categoria del ComboBox
+                // El ComboBox almacena objetos Categoria
+                Categoria categoriaSel = (Categoria)comboBoxCategoria.SelectedItem;
+                p.ID_categoria = categoriaSel.ID_categoria;
+
+                bl.InsertarProducto(p);
+
+                MessageBox.Show("Producto guardado correctamente.");
+                LimpiarCampos();
+                CargarProductos();
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Verifique que el precio y stock sean números válidos");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar producto: " + ex.Message);
+            }
+        }
+
+        private void LimpiarCampos()
+        {
+            TextBox1.Clear();
+            TextBox2.Clear();
+            TextBox3.Clear();
+            comboBoxCategoria.SelectedIndex = -1;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            CargarProductos();
+        }
+
+        private void CargarProductos()
+        {
+            try
+            {
+                dataGridView1.DataSource = bl.ListarProductos();
+                dataGridView1.Columns["ID_producto"].Visible = false;
+                dataGridView1.Columns["ID_categoria"].Visible = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar productos: " + ex.Message);
+            }
+        }
+
+        private void CargarCategorias()
+        {
+            try
+            {
+                List<Categoria> categorias = categoriaBL.Listar();
+                comboBoxCategoria.DataSource = categorias;
+                comboBoxCategoria.DisplayMember = "Nombre_categoria";
+                comboBoxCategoria.ValueMember = "ID_categoria";
+                comboBoxCategoria.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar categorías: " + ex.Message);
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            LimpiarCampos();
+        }
+
+        private void FormularioProducto_Load(object sender, EventArgs e)
+        {
+            this.BackColor = Color.LightBlue;
+            CargarCategorias();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+    }
+}
+
+
+

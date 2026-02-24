@@ -1,0 +1,94 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using CapaEntidades;
+using CapaNegocio;
+
+namespace CapaPresentacion
+{
+    public partial class FormularioProducto : Form
+    {
+        ProductoBL bl = new ProductoBL();
+        public FormularioProducto()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                Producto p = new Producto();
+
+                p.Nombre_producto = TextBox1.Text;
+                p.Precio_producto = Convert.ToDecimal(TextBox2.Text);
+                p.Stock = Convert.ToInt32(TextBox3.Text);
+                
+
+                bl.InsertarProducto(p);
+
+                MessageBox.Show("Producto guardado correctamente.");
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar producto: " + ex.Message);
+            }
+        }
+
+            private void LimpiarCampos()
+        {
+            TextBox1.Clear();
+            TextBox2.Clear();
+            TextBox3.Clear();
+            
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        
+       
+        {
+            CargarProductos();
+        }
+
+        private void CargarProductos()
+        {
+            dataGridView1.DataSource = bl.ListarProductos();
+            dataGridView1.Columns["ID_producto"].Visible = false;
+            dataGridView1.Columns["ID_categoria"].Visible = false;
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+         LimpiarCampos();
+        }
+
+        private void FormularioProducto_Load(object sender, EventArgs e)
+        {
+            this.BackColor = Color.LightBlue;
+           
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+    }
+}
+
+
+

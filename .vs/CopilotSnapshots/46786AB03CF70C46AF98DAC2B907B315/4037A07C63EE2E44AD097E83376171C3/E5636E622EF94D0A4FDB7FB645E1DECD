@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data;
+using System.Data.SqlClient;
+using CapaEntidades;
+
+
+namespace CapaDatos
+{
+    public class VentaDAL
+    {
+        public int InsertarVenta(Venta v)
+        {
+            int newId = 0;
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                cn.Open();
+
+                using (SqlCommand cmd = new SqlCommand("sp_InsertarVenta", cn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@fecha", v.Fecha_venta);
+                    cmd.Parameters.AddWithValue("@cliente", v.Id_cliente);
+                    cmd.Parameters.AddWithValue("@total", v.Total_general);
+                    cmd.Parameters.AddWithValue("@estado", v.Estado_venta);
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Obtener el id insertado
+                using (SqlCommand cmdId = new SqlCommand("sp_InsertarVenta_ConId", cn))
+                {
+                    cmdId.CommandType = CommandType.StoredProcedure;
+                    object result = cmdId.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                        newId = Convert.ToInt32(result);
+                }
+            }
+            return newId;
+        }
+
+        public DataTable ListarVentas()
+        {
+            DataTable dt = new DataTable();
+
+            using (SqlConnection cn = Conexion.ObtenerConexion())
+            {
+                cn.Open();
+
+                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Venta", cn);
+
+                da.Fill(dt);
+            }
+
+            return dt;
+        }
+    }
+}
