@@ -58,7 +58,7 @@ git https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/tree/mast
 <h2> Capturas del Sistema</h2>
 
 <h3> Login</h3>
-<img src=""C:\Users\santa\OneDrive\Imágenes\Capturas de pantalla\Captura de pantalla 2026-02-24 151802.png"" width="600">
+<img src="https://github.com/estarlingdavidsantanasantana/Sistema-de-Ventas-/blob/master/Captura%20de%20pantalla%202026-02-24%20151802.png?raw=true" width="600">
 
 <h3> Formulario de Categoría</h3>
 <img src="LINK_IMAGEN_2" width="600">
